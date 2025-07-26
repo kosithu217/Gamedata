@@ -77,9 +77,7 @@
                             <h4 class="mb-1">{{ $game->title }}</h4>
                             <small class="text-white-50">{{ $game->category->name }}</small>
                             <small class="text-muted">
-                                <a href="{{ asset('storage/' . $game->swf_file_path) }}" target="_blank" class="text-decoration-underline">
-                                    Debug: SWF File
-                                </a>
+                               
                             </small>
                         </div>
                         <div class="d-flex gap-2">
