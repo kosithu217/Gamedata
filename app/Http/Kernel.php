@@ -67,5 +67,6 @@ class Kernel extends HttpKernel
         'verified' => \Illuminate\Auth\Middleware\EnsureEmailIsVerified::class,
         'single.session' => \App\Http\Middleware\SingleSessionMiddleware::class,
         'admin' => \App\Http\Middleware\AdminMiddleware::class,
+        'check.expiration' => \App\Http\Middleware\CheckUserExpiration::class,
     ];
 }

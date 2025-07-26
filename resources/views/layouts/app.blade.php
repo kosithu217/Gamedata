@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
     
-    <title>@yield('title', __('Edu Game Kabar - Fun Learning Games'))</title>
+    <title>@yield('title', trans('messages.Edu Game Kabar - Fun Learning Games'))</title>
     
     <!-- Favicon -->
     <link rel="icon" type="image/png" href="{{ asset('image/logo-6ZHKaEM-.png') }}">
@@ -169,7 +169,7 @@
     <nav class="navbar navbar-expand-lg navbar-light fixed-top">
         <div class="container">
             <a class="navbar-brand" href="{{ route('home') }}">
-                <img src="{{ asset('image/logo-6ZHKaEM-.png') }}" alt="{{ __('edu game kabar Logo') }}" height="30" class="me-2">{{ __('Edu Game Kabar') }}
+                <img src="{{ asset('image/logo-6ZHKaEM-.png') }}" alt="{{ trans('messages.edu game kabar Logo') }}" height="30" class="me-2">{{ trans('messages.Edu Game Kabar') }}
             </a>
             
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
@@ -276,11 +276,11 @@
         <div class="container">
             <div class="row">
                 <div class="col-md-6">
-                    <h5><img src="{{ asset('image/logo-6ZHKaEM-.png') }}" alt="{{ __('edu game kabar Logo') }}" height="30" class="me-2">{{ __('edu game kabar') }}</h5>
-                    <p>{{ __('Fun and educational games for students of all levels.') }}</p>
+                    <h5><img src="{{ asset('image/logo-6ZHKaEM-.png') }}" alt="{{ trans('messages.edu game kabar Logo') }}" height="30" class="me-2">{{ trans('messages.edu game kabar') }}</h5>
+                    <p>{{ trans('messages.Fun and educational games for students of all levels.') }}</p>
                 </div>
                 <div class="col-md-6 text-md-end">
-                    <p>&copy; {{ date('Y') }} {{ __('edu game kabar') }}. {{ __('All rights reserved.') }}</p>
+                    <p>&copy; {{ date('Y') }} {{ trans('messages.edu game kabar') }}. {{ trans('messages.All rights reserved.') }}</p>
                 </div>
             </div>
         </div>

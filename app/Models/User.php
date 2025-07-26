@@ -28,6 +28,7 @@ class User extends Authenticatable
         'address',
         'avatar',
         'is_active',
+        'expires_at',
         'last_login_at',
         'current_session_id',
     ];
@@ -51,6 +52,7 @@ class User extends Authenticatable
         'email_verified_at' => 'datetime',
         'password' => 'hashed',
         'date_of_birth' => 'date',
+        'expires_at' => 'datetime',
         'last_login_at' => 'datetime',
         'is_active' => 'boolean',
         'class_levels' => 'array',
@@ -189,5 +191,65 @@ class User extends Authenticatable
                    ->where('is_active', true)
                    ->with('category')
                    ->get();
+    }
+
+    /**
+     * Check if user account is expired
+     */
+    public function isExpired()
+    {
+        if (!$this->expires_at) {
+            return false; // No expiration date set
+        }
+        
+        return $this->expires_at->isPast();
+    }
+
+    /**
+     * Check if user account will expire soon (within 7 days)
+     */
+    public function isExpiringSoon()
+    {
+        if (!$this->expires_at) {
+            return false;
+        }
+        
+        return $this->expires_at->isFuture() && $this->expires_at->diffInDays(now()) <= 7;
+    }
+
+    /**
+     * Get days until expiration
+     */
+    public function getDaysUntilExpiration()
+    {
+        if (!$this->expires_at) {
+            return null;
+        }
+        
+        if ($this->expires_at->isPast()) {
+            return 0;
+        }
+        
+        return $this->expires_at->diffInDays(now());
+    }
+
+    /**
+     * Deactivate expired user
+     */
+    public function deactivateIfExpired()
+    {
+        if ($this->isExpired() && $this->is_active) {
+            $this->update([
+                'is_active' => false,
+                'current_session_id' => null
+            ]);
+            
+            // Delete all user sessions
+            $this->userSessions()->delete();
+            
+            return true;
+        }
+        
+        return false;
     }
 }

@@ -45,14 +45,14 @@ Route::get('/games/{slug}', [GameController::class, 'show'])->name('games.show')
 Route::get('/games/{slug}/play', [GameController::class, 'play'])->name('games.play');
 
 // Protected routes (require authentication and single session)
-Route::middleware(['auth', 'single.session'])->group(function () {
+Route::middleware(['auth', 'check.expiration', 'single.session'])->group(function () {
     // Student Dashboard - accessible at /dashboard
     Route::get('/dashboard', [App\Http\Controllers\Student\DashboardController::class, 'index'])->name('student.dashboard');
     Route::get('/profile', [App\Http\Controllers\Student\ProfileController::class, 'index'])->name('student.profile');
 });
 
 // Admin routes (single.session middleware allows multiple sessions for admins)
-Route::middleware(['auth', 'admin', 'single.session'])->prefix('admin')->name('admin.')->group(function () {
+Route::middleware(['auth', 'check.expiration', 'admin', 'single.session'])->prefix('admin')->name('admin.')->group(function () {
     Route::get('/', function () {
         return view('admin.dashboard');
     })->name('dashboard');

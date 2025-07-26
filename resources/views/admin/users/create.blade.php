@@ -153,13 +153,26 @@
                                 @enderror
                             </div>
                             
-                            <div class="mb-3">
-                                <div class="form-check">
-                                    <input class="form-check-input" type="checkbox" id="is_active" name="is_active" 
-                                           {{ old('is_active', true) ? 'checked' : '' }}>
-                                    <label class="form-check-label" for="is_active">
-                                        {{ __('Active') }}
-                                    </label>
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label for="expires_at" class="form-label">{{ trans('messages.Account Expires At') }}</label>
+                                    <input type="datetime-local" class="form-control @error('expires_at') is-invalid @enderror" 
+                                           id="expires_at" name="expires_at" value="{{ old('expires_at') }}">
+                                    <div class="form-text">{{ trans('messages.Leave empty for no expiration. User will be automatically logged out and deactivated when expired.') }}</div>
+                                    @error('expires_at')
+                                        <div class="invalid-feedback">{{ $message }}</div>
+                                    @enderror
+                                </div>
+                                
+                                <div class="col-md-6 mb-3">
+                                    <div class="form-check mt-4">
+                                        <input class="form-check-input" type="checkbox" id="is_active" name="is_active" 
+                                               {{ old('is_active', true) ? 'checked' : '' }}>
+                                        <label class="form-check-label" for="is_active">
+                                            {{ trans('messages.Active') }}
+                                        </label>
+                                        <div class="form-text">{{ trans('messages.Inactive users cannot login') }}</div>
+                                    </div>
                                 </div>
                             </div>
                             

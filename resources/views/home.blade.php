@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', __('Edu Game Kabar- Fun Learning Games for Students'))
+@section('title', trans('messages.Edu Game Kabar- Fun Learning Games for Students'))
 
 @push('styles')
 <style>
@@ -566,7 +566,7 @@
                 <div class="slide-overlay"></div>
                 <!-- Animated GIF Background -->
                 <div class="slide-gif-container">
-                    <img src="{{ asset('image/2.gif') }}" alt="{{ __('Game Animation') }}" class="slide-gif">
+                    <img src="{{ asset('image/2.gif') }}" alt="{{ trans('messages.Game Animation') }}" class="slide-gif">
                 </div>
                
             </div>
