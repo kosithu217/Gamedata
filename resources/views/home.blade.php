@@ -13,6 +13,8 @@
         margin-top: -90px;
         overflow: hidden;
         z-index: 1;
+        /* Allow normal scrolling behavior */
+        touch-action: auto;
     }
     
     /* Mobile slider adjustments */
@@ -20,6 +22,33 @@
         .fullscreen-slider {
             height: calc(100vh - 70px);
             margin-top: -70px;
+            /* Allow scrolling on mobile */
+            touch-action: auto;
+            -webkit-overflow-scrolling: touch;
+        }
+        
+        /* Ensure slider doesn't block scrolling */
+        .slider-container {
+            touch-action: auto;
+        }
+        
+        .slide {
+            touch-action: auto;
+        }
+        
+        /* Disable slider interactions on mobile for single slide */
+        .slider-nav {
+            display: none !important;
+        }
+        
+        .slider-dots {
+            display: none !important;
+        }
+        
+        /* Ensure content is scrollable */
+        body {
+            overflow-x: hidden;
+            overflow-y: auto;
         }
     }
     
@@ -152,21 +181,21 @@
         height: 100%;
         object-fit: cover;
         object-position: center;
-        opacity: 0.8;
+        opacity: 1;
         filter: none;
         animation: gifPulse 4s ease-in-out infinite;
     }
     
     @keyframes gifPulse {
         0%, 100% { 
-            opacity: 0.8; 
+            opacity: 1; 
             transform: scale(1);
             filter: brightness(1);
         }
         50% { 
-            opacity: 0.9; 
-            transform: scale(1.02);
-            filter: brightness(1.1);
+            opacity: 1; 
+            transform: scale(1.01);
+            filter: brightness(1.05);
         }
     }
     
@@ -513,17 +542,9 @@
         object-position: center center;
     }
     
-    /* GIF Blend Mode for better integration */
+    /* Clean GIF display without overlay */
     .slide-gif-container::after {
-        content: '';
-        position: absolute;
-        top: 0;
-        left: 0;
-        right: 0;
-        bottom: 0;
-        background: linear-gradient(45deg, rgba(102,126,234,0.1), rgba(118,75,162,0.1));
-        mix-blend-mode: soft-light;
-        z-index: 2;
+        display: none;
     }
     
     /* Slide Entrance Animations */
@@ -558,17 +579,15 @@
 
 @section('content')<br><br>
 <!-- Full Screen Hero Slider -->
-<section class="fullscreen-slider">
+<section class="fullscreen-slider" style="display:none">
     <div class="slider-container" id="heroSlider">
         <div class="slider-track" id="sliderTrack">
-            <!-- Slide 1: Welcome -->
+            <!-- Slide 1: Clean GIF Background -->
             <div class="slide active">
-                <div class="slide-overlay"></div>
                 <!-- Animated GIF Background -->
                 <div class="slide-gif-container">
                     <img src="{{ asset('image/2.gif') }}" alt="{{ trans('messages.Game Animation') }}" class="slide-gif">
                 </div>
-               
             </div>
             
             <!-- Slide 2: Educational Games -->
@@ -783,9 +802,9 @@
                     </div>
                     
                     <div class="d-flex justify-content-center gap-3">
-                        <a href="{{ route('register') }}" class="btn btn-game btn-lg">
+                        <!-- <a href="{{ route('register') }}" class="btn btn-game btn-lg">
                             <i class="fas fa-user-plus me-2"></i>{{ __('Register Free') }}
-                        </a>
+                        </a> -->
                         <a href="{{ route('login') }}" class="btn btn-outline-light btn-lg">
                             <i class="fas fa-sign-in-alt me-2"></i>{{ __('Login') }}
                         </a>
@@ -909,6 +928,14 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Initialize slider
     function initSlider() {
+        // If only one slide, disable slider functionality
+        if (slides.length <= 1) {
+            isAutoPlaying = false;
+            // Hide navigation elements
+            const navElements = document.querySelectorAll('.slider-nav, .slider-dots');
+            navElements.forEach(el => el.style.display = 'none');
+        }
+        
         updateSlider();
         startAutoPlay();
         addEventListeners();
@@ -950,21 +977,22 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Go to next slide
     function nextSlide() {
-        if (isTransitioning) return;
+        if (isTransitioning || slides.length <= 1) return;
         currentSlide = (currentSlide + 1) % slides.length;
         updateSlider();
     }
     
     // Go to previous slide
     function prevSlide() {
-        if (isTransitioning) return;
+        if (isTransitioning || slides.length <= 1) return;
         currentSlide = (currentSlide - 1 + slides.length) % slides.length;
         updateSlider();
     }
     
     // Auto play functionality
     function startAutoPlay() {
-        if (isAutoPlaying) {
+        // Only start autoplay if we have multiple slides
+        if (isAutoPlaying && slides.length > 1) {
             autoPlayInterval = setInterval(nextSlide, 5000);
         }
     }
@@ -986,7 +1014,10 @@ document.addEventListener('DOMContentLoaded', function() {
     }
     
     function handleTouchMove(e) {
-        e.preventDefault();
+        // Only prevent default if we have multiple slides
+        if (slides.length > 1) {
+            e.preventDefault();
+        }
     }
     
     function handleTouchEnd(e) {
@@ -995,6 +1026,9 @@ document.addEventListener('DOMContentLoaded', function() {
     }
     
     function handleSwipe() {
+        // Only handle swipe if we have multiple slides
+        if (slides.length <= 1) return;
+        
         const swipeThreshold = 80;
         const diff = touchStartX - touchEndX;
         
@@ -1052,6 +1086,9 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Mouse wheel navigation
     function handleWheel(e) {
+        // Only handle wheel navigation if we have multiple slides
+        if (slides.length <= 1) return;
+        
         if (Math.abs(e.deltaY) > 50) {
             e.preventDefault();
             if (e.deltaY > 0) {
@@ -1083,10 +1120,12 @@ document.addEventListener('DOMContentLoaded', function() {
             });
         });
         
-        // Touch events
-        slider.addEventListener('touchstart', handleTouchStart, { passive: true });
-        slider.addEventListener('touchmove', handleTouchMove, { passive: false });
-        slider.addEventListener('touchend', handleTouchEnd, { passive: true });
+        // Touch events (only if multiple slides)
+        if (slides.length > 1) {
+            slider.addEventListener('touchstart', handleTouchStart, { passive: true });
+            slider.addEventListener('touchmove', handleTouchMove, { passive: false });
+            slider.addEventListener('touchend', handleTouchEnd, { passive: true });
+        }
         
         // Mouse events
         slider.addEventListener('mouseenter', stopAutoPlay);
@@ -1097,8 +1136,10 @@ document.addEventListener('DOMContentLoaded', function() {
         // Keyboard navigation
         document.addEventListener('keydown', handleKeyPress);
         
-        // Mouse wheel navigation
-        slider.addEventListener('wheel', handleWheel, { passive: false });
+        // Mouse wheel navigation (only if multiple slides)
+        if (slides.length > 1) {
+            slider.addEventListener('wheel', handleWheel, { passive: false });
+        }
         
         // Visibility API
         document.addEventListener('visibilitychange', () => {
