@@ -327,4 +327,68 @@ class GameController extends Controller
             ]
         ]);
     }
+
+    /**
+     * Get all games without authentication
+     */
+    public function allGamesNoAuth(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'category_id' => 'nullable|exists:categories,id',
+            'search' => 'nullable|string|max:255',
+            'is_featured' => 'nullable|boolean',
+            'per_page' => 'nullable|integer|min:1|max:100',
+            'page' => 'nullable|integer|min:1'
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Validation failed',
+                'errors' => $validator->errors()
+            ], 422);
+        }
+
+        $query = Game::where('is_active', true)->with('category');
+
+        // Filter by category
+        if ($request->has('category_id') && $request->category_id) {
+            $query->where('category_id', $request->category_id);
+        }
+
+        // Search functionality
+        if ($request->has('search') && $request->search) {
+            $search = $request->search;
+            $query->where(function($q) use ($search) {
+                $q->where('title', 'like', '%' . $search . '%')
+                  ->orWhere('title_mm', 'like', '%' . $search . '%')
+                  ->orWhere('description', 'like', '%' . $search . '%');
+            });
+        }
+
+        // Filter by featured
+        if ($request->has('is_featured')) {
+            $query->where('is_featured', $request->boolean('is_featured'));
+        }
+
+        // No authentication restrictions - return all active games
+        $perPage = $request->get('per_page', 15);
+        $games = $query->orderBy('sort_order')->orderBy('created_at', 'desc')->paginate($perPage);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'All games retrieved successfully',
+            'data' => [
+                'games' => $games->items(),
+                'pagination' => [
+                    'current_page' => $games->currentPage(),
+                    'last_page' => $games->lastPage(),
+                    'per_page' => $games->perPage(),
+                    'total' => $games->total(),
+                    'from' => $games->firstItem(),
+                    'to' => $games->lastItem(),
+                ]
+            ]
+        ]);
+    }
 }

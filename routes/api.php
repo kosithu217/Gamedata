@@ -29,6 +29,7 @@ Route::prefix('v1')->group(function () {
     Route::get('/games', [GameController::class, 'index']);
     Route::get('/games/featured', [GameController::class, 'featured']);
     Route::get('/games/popular', [GameController::class, 'popular']);
+    Route::get('/allgamenoauth', [GameController::class, 'allGamesNoAuth']);
     Route::get('/games/{slug}', [GameController::class, 'show']);
     Route::post('/games/{slug}/play', [GameController::class, 'play']);
     Route::get('/games/category/{categorySlug}', [GameController::class, 'byCategory']);
@@ -84,3 +85,6 @@ Route::prefix('v1')->middleware('auth:sanctum')->group(function () {
 Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();
 });
+
+// Fallback route for allgamenoauth (if needed)
+Route::get('/v1/allgamenoauth', [GameController::class, 'allGamesNoAuth']);
