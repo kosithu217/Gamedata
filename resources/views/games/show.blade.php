@@ -5,30 +5,30 @@
 @push('styles')
 <style>
     .game-player-container {
-        background: white;
+        background: #B8B2B0;
         border-radius: 10px;
         overflow: hidden;
-        box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        box-shadow: 0 10px 30px rgba(184,178,176,0.3);
         margin-bottom: 2rem;
-        border: 1px solid #e0e0e0;
+        border: 1px solid #A8A2A0;
     }
 
     .game-player-header {
-        background: rgba(255,255,255,0.95);
+        background: rgba(184,178,176,0.95);
         backdrop-filter: blur(10px);
         padding: 15px;
         color: #333;
         display: flex;
         justify-content: between;
         align-items: center;
-        border-bottom: 1px solid #e0e0e0;
+        border-bottom: 1px solid #A8A2A0;
     }
 
     #gameContainer {
         display: flex;
         justify-content: center;
         align-items: center;
-        background: white;
+        background: #B8B2B0;
         min-height: {{ $game->height + 100 }}px;
         padding: 20px;
     }
@@ -44,11 +44,11 @@
     }
 
     .game-controls {
-        background: rgba(0,0,0,0.05);
+        background: rgba(184,178,176,0.3);
         padding: 10px;
         text-align: center;
-        color: #666;
-        border-top: 1px solid #e0e0e0;
+        color: #333;
+        border-top: 1px solid #A8A2A0;
     }
 
     .btn-fullscreen {
@@ -70,26 +70,40 @@
 
     /* Override any black backgrounds from Ruffle player */
     #gameContainer ruffle-player {
-        background: transparent !important;
+        background: #B8B2B0 !important;
     }
 
     #gameContainer canvas {
-        background: white !important;
+        background: #B8B2B0 !important;
     }
 
     /* Ensure the game area has proper styling */
     #gameContainer ruffle-embed {
-        background: transparent !important;
+        background: #B8B2B0 !important;
     }
 
     /* Additional override for any nested elements */
     #gameContainer * {
-        background-color: transparent !important;
+        background-color: #B8B2B0 !important;
     }
 
     /* But allow the actual game content to have its own background */
     #gameContainer ruffle-player canvas {
-        background: white !important;
+        background: #B8B2B0 !important;
+    }
+
+    /* Additional styling for better appearance */
+    .game-player-container {
+        box-shadow: 0 10px 30px rgba(184,178,176,0.4);
+    }
+
+    /* Ensure loading text is visible on light gray background */
+    .loading-spinner {
+        color: #333 !important;
+    }
+
+    .loading-spinner .text-light {
+        color: #333 !important;
     }
 </style>
 @endpush
@@ -290,7 +304,7 @@ document.addEventListener('DOMContentLoaded', async function() {
             window.RufflePlayer.config = {
                 "autoplay": "on",
                 "unmuteOverlay": "visible", 
-                "backgroundColor": "transparent",
+                "backgroundColor": "#B8B2B0",
                 "wmode": "transparent",
                 "logLevel": "warn",
                 "letterbox": "on",
@@ -321,7 +335,7 @@ document.addEventListener('DOMContentLoaded', async function() {
             player.style.maxHeight = "100%";
             player.style.display = "block";
             player.style.margin = "0 auto";
-            player.style.backgroundColor = "transparent";
+            player.style.backgroundColor = "#B8B2B0";
 
             // Clear the loading content and add player to container
             gameContainer.innerHTML = '';
