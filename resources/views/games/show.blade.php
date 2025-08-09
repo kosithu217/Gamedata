@@ -5,59 +5,91 @@
 @push('styles')
 <style>
     .game-player-container {
-        background: #000;
+        background: white;
         border-radius: 10px;
         overflow: hidden;
-        box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+        box-shadow: 0 10px 30px rgba(0,0,0,0.1);
         margin-bottom: 2rem;
+        border: 1px solid #e0e0e0;
     }
 
     .game-player-header {
-        background: rgba(255,255,255,0.1);
+        background: rgba(255,255,255,0.95);
         backdrop-filter: blur(10px);
         padding: 15px;
-        color: white;
+        color: #333;
         display: flex;
         justify-content: between;
         align-items: center;
+        border-bottom: 1px solid #e0e0e0;
     }
 
     #gameContainer {
         display: flex;
         justify-content: center;
         align-items: center;
-        background: #222;
+        background: white;
         min-height: {{ $game->height + 100 }}px;
         padding: 20px;
     }
 
     .loading-spinner, .error-message {
-        color: white;
+        color: #333;
         text-align: center;
         padding: 20px;
     }
 
+    .loading-spinner .spinner-border {
+        color: var(--primary-color) !important;
+    }
+
     .game-controls {
-        background: rgba(255,255,255,0.05);
+        background: rgba(0,0,0,0.05);
         padding: 10px;
         text-align: center;
-        color: white;
+        color: #666;
+        border-top: 1px solid #e0e0e0;
     }
 
     .btn-fullscreen {
-        background: rgba(255,255,255,0.2);
-        border: 1px solid rgba(255,255,255,0.3);
+        background: var(--primary-color);
+        border: 1px solid var(--primary-color);
         color: white;
         font-size: 0.875rem;
     }
 
     .btn-fullscreen:hover {
-        background: rgba(255,255,255,0.3);
+        background: var(--secondary-color);
+        border-color: var(--secondary-color);
         color: white;
     }
 
     .game-info-section {
         margin-top: 2rem;
+    }
+
+    /* Override any black backgrounds from Ruffle player */
+    #gameContainer ruffle-player {
+        background: transparent !important;
+    }
+
+    #gameContainer canvas {
+        background: white !important;
+    }
+
+    /* Ensure the game area has proper styling */
+    #gameContainer ruffle-embed {
+        background: transparent !important;
+    }
+
+    /* Additional override for any nested elements */
+    #gameContainer * {
+        background-color: transparent !important;
+    }
+
+    /* But allow the actual game content to have its own background */
+    #gameContainer ruffle-player canvas {
+        background: white !important;
     }
 </style>
 @endpush
@@ -258,7 +290,7 @@ document.addEventListener('DOMContentLoaded', async function() {
             window.RufflePlayer.config = {
                 "autoplay": "on",
                 "unmuteOverlay": "visible", 
-                "backgroundColor": "#000000",
+                "backgroundColor": "transparent",
                 "wmode": "transparent",
                 "logLevel": "warn",
                 "letterbox": "on",
@@ -289,7 +321,7 @@ document.addEventListener('DOMContentLoaded', async function() {
             player.style.maxHeight = "100%";
             player.style.display = "block";
             player.style.margin = "0 auto";
-            player.style.backgroundColor = "#000000";
+            player.style.backgroundColor = "transparent";
 
             // Clear the loading content and add player to container
             gameContainer.innerHTML = '';
@@ -356,13 +388,13 @@ document.addEventListener('DOMContentLoaded', async function() {
         gameContainer.innerHTML = `
             <div class="error-message">
                 <i class="fas fa-exclamation-triangle fa-3x mb-3 text-warning"></i>
-                <h5>${title}</h5>
-                <p>${message}</p>
+                <h5 class="text-dark">${title}</h5>
+                <p class="text-muted">${message}</p>
                 <div class="mt-3">
-                    <button onclick="location.reload()" class="btn btn-outline-warning">
+                    <button onclick="location.reload()" class="btn btn-warning">
                         <i class="fas fa-redo me-1"></i>{{ __('Retry') }}
                     </button>
-                    <a href="{{ route('games.play', $game->slug) }}" class="btn btn-outline-light ms-2">
+                    <a href="{{ route('games.play', $game->slug) }}" class="btn btn-primary ms-2">
                         <i class="fas fa-external-link-alt me-1"></i>{{ __('Full Page Mode') }}
                     </a>
                 </div>
