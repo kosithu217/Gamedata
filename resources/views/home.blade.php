@@ -712,7 +712,7 @@
                 <p class="text-white-50">{{ __('Try these 6 sample games - No login required!') }}</p>
                 <div class="alert alert-success d-inline-block">
                     <i class="fas fa-play-circle me-2"></i>
-                    {{ __('Play 6 demo games instantly! Register to access 50+ educational games!') }}
+                    {{ __('Play 12 demo games for free! Purchase now to access 350+ educational games!') }}
                 </div>
             @else
                 <h2 class="fw-bold text-white">{{ __('Featured Games') }}</h2>

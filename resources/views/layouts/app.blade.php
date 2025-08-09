@@ -135,6 +135,73 @@
             margin-top: 50px;
         }
         
+        .social-links {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+        
+        .social-link {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 20px;
+            border-radius: 25px;
+            text-decoration: none;
+            color: white;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            border: 2px solid transparent;
+        }
+        
+        .social-link:hover {
+            color: white;
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+        }
+        
+        .social-link.facebook {
+            background: linear-gradient(45deg, #1877f2, #42a5f5);
+            border-color: #1877f2;
+        }
+        
+        .social-link.facebook:hover {
+            background: linear-gradient(45deg, #166fe5, #1877f2);
+            box-shadow: 0 5px 15px rgba(24, 119, 242, 0.4);
+        }
+        
+        .social-link.tiktok {
+            background: linear-gradient(45deg, #ff0050, #ff4081);
+            border-color: #ff0050;
+        }
+        
+        .social-link.tiktok:hover {
+            background: linear-gradient(45deg, #e6004a, #ff0050);
+            box-shadow: 0 5px 15px rgba(255, 0, 80, 0.4);
+        }
+        
+        .social-link i {
+            font-size: 1.2rem;
+        }
+        
+        @media (max-width: 768px) {
+            .social-links {
+                justify-content: center;
+                margin-bottom: 20px;
+            }
+            
+            .social-link {
+                padding: 8px 16px;
+                font-size: 0.9rem;
+            }
+            
+            .footer .col-md-4 {
+                text-align: center !important;
+                margin-bottom: 20px;
+            }
+        }
+        
         .alert {
             border-radius: 15px;
             border: none;
@@ -275,12 +342,34 @@
     <footer class="footer">
         <div class="container">
             <div class="row">
-                <div class="col-md-6">
+                <div class="col-md-4">
                     <h5><img src="{{ asset('image/logo-6ZHKaEM-.png') }}" alt="{{ trans('messages.edu game kabar Logo') }}" height="30" class="me-2">{{ trans('messages.edu game kabar') }}</h5>
                     <p>{{ trans('messages.Fun and educational games for students of all levels.') }}</p>
                 </div>
-                <div class="col-md-6 text-md-end">
-                    <p>&copy; {{ date('Y') }} {{ trans('messages.edu game kabar') }}. {{ trans('messages.All rights reserved.') }}</p>
+                <div class="col-md-4 text-center">
+                    <h6 class="mb-3">{{ trans('messages.Follow Us') }}</h6>
+                    <div class="social-links">
+                        <a href="https://www.facebook.com/edugamekabar?mibextid=ZbWKwL" target="_blank" rel="noopener noreferrer" class="social-link facebook">
+                            <i class="fab fa-facebook-f"></i>
+                            <span>Facebook</span>
+                        </a>
+                        <a href="https://www.tiktok.com/@edugamekabar.com?_t=ZS-8yizjnGzZup&_r=1" target="_blank" rel="noopener noreferrer" class="social-link tiktok">
+                            <i class="fab fa-tiktok"></i>
+                            <span>TikTok</span>
+                        </a>
+                    </div>
+                </div>
+                <div class="col-md-4 text-md-end">
+                    <h6 class="mb-3">{{ trans('messages.Contact Info') }}</h6>
+                    <p class="mb-1">
+                        <i class="fas fa-envelope me-2"></i>
+                        <a href="mailto:info@edugamekabar.com" class="text-light text-decoration-none">info@edugamekabar.com</a>
+                    </p>
+                    <p class="mb-3">
+                        <i class="fas fa-globe me-2"></i>
+                        <a href="https://edugamekabar.com" class="text-light text-decoration-none">edugamekabar.com</a>
+                    </p>
+                    <p class="mb-0">&copy; {{ date('Y') }} {{ trans('messages.edu game kabar') }}. {{ trans('messages.All rights reserved.') }}</p>
                 </div>
             </div>
         </div>

@@ -371,4 +371,8 @@ return [
     'edu game kabar Logo' => 'edu game kabar Logo',
     'Game Animation' => 'Game Animation',
     'Edu Game Kabar- Fun Learning Games for Students' => 'Edu Game Kabar- Fun Learning Games for Students',
+    
+    // Footer Social Media
+    'Follow Us' => 'Follow Us',
+    'Contact Info' => 'Contact Info',
 ];

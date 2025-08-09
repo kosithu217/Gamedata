@@ -324,8 +324,9 @@ For support and questions:
 ---
 
 **Edu Game Kaper ** - Making learning fun through interactive Flash games!
-Wev site is   https://edugamekabar.com/
-Logo    https://edugamekabar.com/image/logo-6ZHKaEM-.png
+Wev site is https://edugamekabar.com/
+Logo https://edugamekabar.com/image/logo-6ZHKaEM-.png
+
 ## 🚀 API Documentation
 
 The application provides a comprehensive REST API for all major functionalities. All API endpoints are prefixed with `/api/v1/`.

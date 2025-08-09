@@ -63,13 +63,13 @@
                             <i class="fas fa-sign-in-alt me-2"></i>{{ __('Login') }}
                         </button>
                         
-                        <div class="text-center">
+                        <!-- <div class="text-center">
                             <p class="mb-0">{{ __("Don't have an account?") }} 
                                 <a href="{{ route('register') }}" class="text-decoration-none">
                                     {{ __('Register here') }}
                                 </a>
                             </p>
-                        </div>
+                        </div> -->
                     </form>
                 </div>
             </div>

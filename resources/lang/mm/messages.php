@@ -246,4 +246,8 @@ return [
     'edu game kabar Logo' => 'edu game kabar လိုဂို',
     'Game Animation' => 'ဂိမ်းကာတွန်း',
     'Edu Game Kabar- Fun Learning Games for Students' => 'Edu Game Kabar- ကျောင်းသားများအတွက် ပျော်ရွှင်ဖွယ် သင်ယူမှုဂိမ်းများ',
+    
+    // Footer Social Media
+    'Follow Us' => 'ကျွန်ုပ်တို့ကို လိုက်ပါ',
+    'Contact Info' => 'ဆက်သွယ်ရန်အချက်အလက်',
 ];
