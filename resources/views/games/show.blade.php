@@ -171,7 +171,7 @@
                         </div>
                         @endif
                         
-                        <div class="row">
+                        <!-- <div class="row">
                             <div class="col-md-6">
                                 <h6>{{ __('Game Details') }}</h6>
                                 <ul class="list-unstyled">
@@ -181,7 +181,7 @@
                                     <li><strong>{{ __('Total Plays') }}:</strong> {{ $game->plays_count }}</li>
                                 </ul>
                             </div>
-                        </div>
+                        </div> -->
                     </div>
                 </div>
             </div>
