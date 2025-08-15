@@ -37,20 +37,21 @@ class LoginController extends Controller
             $user = Auth::user();
             $sessionId = session()->getId();
             
+            // Clean up expired sessions first
+            $this->cleanupExpiredSessions($user->id);
+            
             // Skip single session check for admin users - they can login from multiple devices
             if (!$user->isAdmin()) {
-                // For students only: Check if user has an active session elsewhere
-                if ($user->current_session_id && $user->current_session_id !== $sessionId) {
-                    // Get info about the existing session
-                    $existingSession = UserSession::where('user_id', $user->id)
-                        ->where('is_active', true)
-                        ->first();
-                    
-                    $deviceInfo = '';
-                    if ($existingSession) {
-                        $deviceInfo = ' from ' . $this->getDeviceInfo($existingSession->user_agent) . 
-                                     ' (IP: ' . $existingSession->ip_address . ')';
-                    }
+                // For students only: Check if user has an ACTIVE session elsewhere (not expired)
+                $activeSession = UserSession::where('user_id', $user->id)
+                    ->where('is_active', true)
+                    ->where('session_id', '!=', $sessionId)
+                    ->where('last_activity', '>', now()->subMinutes(config('session.lifetime')))
+                    ->first();
+                
+                if ($activeSession) {
+                    $deviceInfo = $this->getDeviceInfo($activeSession->user_agent);
+                    $loginTime = $activeSession->last_activity->diffForHumans();
                     
                     // Force logout the user and show message
                     Auth::logout();
@@ -58,7 +59,7 @@ class LoginController extends Controller
                     $request->session()->regenerateToken();
                     
                     return redirect()->route('login')->with('error', 
-                        'Your account is already logged in' . $deviceInfo . '. Please logout from the other device first, or contact support if you believe this is an error.');
+                        'Your account is currently logged in from another device (' . $deviceInfo . ') since ' . $loginTime . '. Please logout from the other device first, or wait for the session to expire.');
                 }
             }
             
@@ -99,6 +100,21 @@ class LoginController extends Controller
         ]);
     }
     
+    /**
+     * Clean up expired sessions for a user
+     */
+    private function cleanupExpiredSessions($userId)
+    {
+        $sessionLifetime = config('session.lifetime'); // in minutes
+        $expiredTime = now()->subMinutes($sessionLifetime);
+        
+        // Mark expired sessions as inactive
+        UserSession::where('user_id', $userId)
+            ->where('is_active', true)
+            ->where('last_activity', '<', $expiredTime)
+            ->update(['is_active' => false]);
+    }
+
     /**
      * Get device info from user agent
      */

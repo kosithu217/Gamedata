@@ -19,6 +19,9 @@ class SingleSessionMiddleware
             $user = auth()->user();
             $currentSessionId = session()->getId();
             
+            // Clean up expired sessions first
+            $this->cleanupExpiredSessions($user->id);
+            
             // Skip single session check for admin users - they can login from multiple devices
             if ($user->isAdmin()) {
                 // Just update session tracking for admins without restrictions
@@ -41,30 +44,23 @@ class SingleSessionMiddleware
                 return $next($request);
             }
             
-            // For students only: Check if user has a different active session
-            if ($user->current_session_id && $user->current_session_id !== $currentSessionId) {
-                // Get info about the existing session
-                $existingSession = \App\Models\UserSession::where('user_id', $user->id)
-                    ->where('is_active', true)
-                    ->first();
-                
-                $deviceInfo = '';
-                $loginTime = '';
-                if ($existingSession) {
-                    $deviceInfo = $this->getDeviceInfo($existingSession->user_agent);
-                    $loginTime = $existingSession->last_activity->diffForHumans();
-                }
+            // For students only: Check if user has an ACTIVE session elsewhere (not expired)
+            $activeSession = \App\Models\UserSession::where('user_id', $user->id)
+                ->where('is_active', true)
+                ->where('session_id', '!=', $currentSessionId)
+                ->where('last_activity', '>', now()->subMinutes(config('session.lifetime')))
+                ->first();
+            
+            if ($activeSession) {
+                $deviceInfo = $this->getDeviceInfo($activeSession->user_agent);
+                $loginTime = $activeSession->last_activity->diffForHumans();
                 
                 // Log out the user and redirect with detailed message
                 auth()->logout();
                 session()->invalidate();
                 session()->regenerateToken();
                 
-                $errorMessage = 'Your account is currently logged in from another device (' . $deviceInfo . ')';
-                if ($loginTime) {
-                    $errorMessage .= ' since ' . $loginTime;
-                }
-                $errorMessage .= '. Please logout from the other device first.';
+                $errorMessage = 'Your account is currently logged in from another device (' . $deviceInfo . ') since ' . $loginTime . '. Please logout from the other device first.';
                 
                 return redirect()->route('login')->with('error', $errorMessage);
             }
@@ -90,6 +86,21 @@ class SingleSessionMiddleware
         return $next($request);
     }
     
+    /**
+     * Clean up expired sessions for a user
+     */
+    private function cleanupExpiredSessions($userId)
+    {
+        $sessionLifetime = config('session.lifetime'); // in minutes
+        $expiredTime = now()->subMinutes($sessionLifetime);
+        
+        // Mark expired sessions as inactive
+        \App\Models\UserSession::where('user_id', $userId)
+            ->where('is_active', true)
+            ->where('last_activity', '<', $expiredTime)
+            ->update(['is_active' => false]);
+    }
+
     /**
      * Get device info from user agent
      */
