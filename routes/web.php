@@ -59,8 +59,11 @@ Route::middleware(['auth', 'check.expiration', 'admin', 'single.session'])->pref
     
     Route::resource('categories', AdminCategoryController::class);
     Route::resource('games', AdminGameController::class);
+    Route::post('/games/{game}/toggle-status', [AdminGameController::class, 'toggleStatus'])->name('games.toggle-status');
+    Route::post('/games/{game}/toggle-featured', [AdminGameController::class, 'toggleFeatured'])->name('games.toggle-featured');
     Route::resource('blog-posts', AdminBlogPostController::class);
     Route::resource('users', AdminUserController::class);
+    Route::post('/users/{user}/toggle-status', [AdminUserController::class, 'toggleStatus'])->name('users.toggle-status');
     
     // Session management
     Route::post('/users/{user}/force-logout', [LoginController::class, 'forceLogoutAllSessions'])->name('users.force-logout');

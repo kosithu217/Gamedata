@@ -11,10 +11,63 @@ use Illuminate\Support\Facades\Storage;
 
 class GameController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        $games = Game::with('category')->orderBy('created_at', 'desc')->paginate(10);
-        return view('admin.games.index', compact('games'));
+        $query = Game::with('category');
+        
+        // Search functionality
+        if ($request->filled('search')) {
+            $search = $request->get('search');
+            $query->where(function($q) use ($search) {
+                $q->where('title', 'LIKE', "%{$search}%")
+                  ->orWhere('title_mm', 'LIKE', "%{$search}%")
+                  ->orWhere('description', 'LIKE', "%{$search}%")
+                  ->orWhere('description_mm', 'LIKE', "%{$search}%")
+                  ->orWhereHas('category', function($categoryQuery) use ($search) {
+                      $categoryQuery->where('name', 'LIKE', "%{$search}%")
+                                   ->orWhere('name_mm', 'LIKE', "%{$search}%");
+                  });
+            });
+        }
+        
+        // Filter by category
+        if ($request->filled('category')) {
+            $query->where('category_id', $request->get('category'));
+        }
+        
+        // Filter by status
+        if ($request->filled('status')) {
+            if ($request->get('status') === 'active') {
+                $query->where('is_active', true);
+            } elseif ($request->get('status') === 'inactive') {
+                $query->where('is_active', false);
+            }
+        }
+        
+        // Filter by featured
+        if ($request->filled('featured')) {
+            if ($request->get('featured') === 'yes') {
+                $query->where('is_featured', true);
+            } elseif ($request->get('featured') === 'no') {
+                $query->where('is_featured', false);
+            }
+        }
+        
+        // Sort options
+        $sortBy = $request->get('sort', 'created_at');
+        $sortOrder = $request->get('order', 'desc');
+        
+        $allowedSorts = ['created_at', 'title', 'plays_count', 'updated_at'];
+        if (in_array($sortBy, $allowedSorts)) {
+            $query->orderBy($sortBy, $sortOrder);
+        } else {
+            $query->orderBy('created_at', 'desc');
+        }
+        
+        $games = $query->paginate(15)->withQueryString();
+        $categories = Category::where('is_active', true)->orderBy('name')->get();
+        
+        return view('admin.games.index', compact('games', 'categories'));
     }
 
     public function create()
@@ -149,5 +202,35 @@ class GameController extends Controller
         
         return redirect()->route('admin.games.index')
             ->with('success', 'Game deleted successfully.');
+    }
+    
+    /**
+     * Toggle game status (active/inactive)
+     */
+    public function toggleStatus(Game $game)
+    {
+        $game->update(['is_active' => !$game->is_active]);
+        
+        $status = $game->is_active ? 'activated' : 'deactivated';
+        return response()->json([
+            'success' => true,
+            'message' => "Game {$status} successfully.",
+            'is_active' => $game->is_active
+        ]);
+    }
+    
+    /**
+     * Toggle featured status
+     */
+    public function toggleFeatured(Game $game)
+    {
+        $game->update(['is_featured' => !$game->is_featured]);
+        
+        $status = $game->is_featured ? 'featured' : 'unfeatured';
+        return response()->json([
+            'success' => true,
+            'message' => "Game {$status} successfully.",
+            'is_featured' => $game->is_featured
+        ]);
     }
 }

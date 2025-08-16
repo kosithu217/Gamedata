@@ -363,7 +363,7 @@
                     <h6 class="mb-3">{{ trans('messages.Contact Info') }}</h6>
                     <p class="mb-1">
                         <i class="fas fa-envelope me-2"></i>
-                        <a href="mailto:info@edugamekabar.com" class="text-light text-decoration-none">info@edugamekabar.com</a>
+                        <a href="mailto:edugamekabar@gmail.com" class="text-light text-decoration-none">edugamekabar@gmail.com</a>
                     </p>
                     <p class="mb-3">
                         <i class="fas fa-globe me-2"></i>

@@ -712,7 +712,7 @@
                 <p class="text-white-50">{{ __('Try these 6 sample games - No login required!') }}</p>
                 <div class="alert alert-success d-inline-block">
                     <i class="fas fa-play-circle me-2"></i>
-                    {{ __('Play 12 demo games for free! Purchase now to access 350+ educational games!') }}
+                    {{ __('Play 6 demo games for free! Purchase now to access 350+ educational games!') }}
                 </div>
             @else
                 <h2 class="fw-bold text-white">{{ __('Featured Games') }}</h2>
@@ -773,49 +773,7 @@
         </div>
         @else
         <!-- Registration Encouragement for Guests -->
-        <div class="text-center mt-4">
-            <div class="card" style="background: rgba(255,255,255,0.1); backdrop-filter: blur(10px); border: none;">
-                <div class="card-body py-4">
-                    <h4 class="text-white mb-3">
-                        <i class="fas fa-rocket me-2"></i>{{ __('Enjoyed the Demo Games?') }}
-                    </h4>
-                    <p class="text-white-50 mb-4">
-                        {{ __('You\'ve tried 6 demo games! Register now to unlock 50+ educational games, track your progress, and access exclusive content!') }}
-                    </p>
-                    
-                    <div class="row text-white-50 mb-4">
-                        <div class="col-md-4 mb-3">
-                            <i class="fas fa-gamepad fa-2x text-success mb-2"></i>
-                            <h6>{{ __('50+ Games') }}</h6>
-                            <small>{{ __('Full game library access') }}</small>
-                        </div>
-                        <div class="col-md-4 mb-3">
-                            <i class="fas fa-chart-line fa-2x text-info mb-2"></i>
-                            <h6>{{ __('Progress Tracking') }}</h6>
-                            <small>{{ __('Monitor your learning') }}</small>
-                        </div>
-                        <div class="col-md-4 mb-3">
-                            <i class="fas fa-trophy fa-2x text-warning mb-2"></i>
-                            <h6>{{ __('Achievements') }}</h6>
-                            <small>{{ __('Earn rewards & badges') }}</small>
-                        </div>
-                    </div>
-                    
-                    <div class="d-flex justify-content-center gap-3">
-                        <!-- <a href="{{ route('register') }}" class="btn btn-game btn-lg">
-                            <i class="fas fa-user-plus me-2"></i>{{ __('Register Free') }}
-                        </a> -->
-                        <a href="{{ route('login') }}" class="btn btn-outline-light btn-lg">
-                            <i class="fas fa-sign-in-alt me-2"></i>{{ __('Login') }}
-                        </a>
-                    </div>
-                    
-                    <p class="text-white-50 mt-3 mb-0">
-                        <small>{{ __('Registration is completely free and takes less than 2 minutes!') }}</small>
-                    </p>
-                </div>
-            </div>
-        </div>
+      
         @endauth
     </div>
 </section>
