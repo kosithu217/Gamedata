@@ -105,6 +105,14 @@
     .loading-spinner .text-light {
         color: #333 !important;
     }
+
+    /* Iframe game styling */
+    .iframe-game-container iframe {
+        border: none;
+        border-radius: 8px;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+        background: white;
+    }
 </style>
 @endpush
 
@@ -144,13 +152,21 @@
             <!-- Game Player -->
             <div class="game-player-container">
                 <div id="gameContainer">
-                    <div class="loading-spinner">
-                        <div class="spinner-border text-light mb-3" role="status">
-                            <span class="visually-hidden">{{ __('Loading...') }}</span>
+                    @if(!$game->swf_file_path && ($game->iframe_code || $game->iframe_url))
+                        <!-- Iframe Game -->
+                        <div class="iframe-game-container" style="width: 100%; height: 100%; display: flex; justify-content: center; align-items: center;">
+                            {!! $game->getGameContent() !!}
                         </div>
-                        <p>{{ __('Loading game...') }}</p>
-                        <small class="text-muted">{{ __('This may take a few moments') }}</small>
-                    </div>
+                    @else
+                        <!-- SWF Game -->
+                        <div class="loading-spinner">
+                            <div class="spinner-border text-light mb-3" role="status">
+                                <span class="visually-hidden">{{ __('Loading...') }}</span>
+                            </div>
+                            <p>{{ __('Loading game...') }}</p>
+                            <small class="text-muted">{{ __('This may take a few moments') }}</small>
+                        </div>
+                    @endif
                 </div>
                 
                 <!-- <div class="game-controls">
@@ -232,17 +248,19 @@
 @endsection
 
 @push('scripts')
-<!-- Load Ruffle Player -->
+@if($game->swf_file_path)
+<!-- Load Ruffle Player for SWF Games -->
 <script src="{{ asset('js/ruffle.js') }}"></script>
 <script src="{{ asset('js/core.ruffle.edefc3c47ead559992c5.js') }}"></script>
 <script src="{{ asset('js/core.ruffle.1dd0cea78253a60e4f1e.js') }}"></script>
+@endif
 
 <script>
 document.addEventListener('DOMContentLoaded', async function() {
     const gameContainer = document.getElementById('gameContainer');
     const fullscreenBtn = document.getElementById('fullscreenBtn');
     const gameStatus = document.getElementById('gameStatus');
-    const swfUrl = "{{ asset('storage/' . $game->swf_file_path) }}";
+    const isIframeGame = {{ (!$game->swf_file_path && ($game->iframe_code || $game->iframe_url)) ? 'true' : 'false' }};
 
     // Update game status
     function updateStatus(status, type = 'info') {
@@ -254,6 +272,204 @@ document.addEventListener('DOMContentLoaded', async function() {
         };
         gameStatus.innerHTML = `<span class="badge ${statusClasses[type]}">${status}</span>`;
     }
+
+    @if(!$game->swf_file_path && ($game->iframe_code || $game->iframe_url))
+        // Iframe Game - Already loaded
+        console.log('✅ Iframe game detected and loaded');
+        updateStatus('{{ __("Game ready!") }}', 'success');
+        
+        // Make iframe responsive
+        const iframe = gameContainer.querySelector('iframe');
+        if (iframe) {
+            iframe.style.width = '{{ $game->width }}px';
+            iframe.style.height = '{{ $game->height }}px';
+            iframe.style.maxWidth = '100%';
+            iframe.style.maxHeight = '100%';
+            iframe.style.border = 'none';
+            iframe.style.display = 'block';
+            iframe.style.margin = '0 auto';
+            iframe.style.borderRadius = '8px';
+            iframe.style.boxShadow = '0 4px 15px rgba(0,0,0,0.2)';
+            
+            console.log('✅ Iframe styled successfully');
+        }
+        
+        // Increment play count for iframe games
+        fetch(`{{ route('games.play', $game->slug) }}`, {
+            method: 'POST',
+            headers: {
+                'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                'Accept': 'application/json',
+                'Content-Type': 'application/json'
+            }
+        }).catch(error => console.log('Play count update failed:', error));
+        
+    @else
+        // SWF Game - Initialize Ruffle
+        const swfUrl = "{{ asset('storage/' . $game->swf_file_path) }}";
+    
+        console.log('🎮 SWF Game detected');
+        console.log('- SWF URL:', swfUrl);
+
+        // Debug information
+        console.log('Game Debug Info:');
+        console.log('- Game Title:', "{{ $game->title }}");
+        console.log('- SWF Path:', "{{ $game->swf_file_path }}");
+        console.log('- Game Dimensions:', "{{ $game->width }}x{{ $game->height }}");
+
+        // Check if SWF file is accessible
+        async function checkSwfFile() {
+            try {
+                updateStatus('{{ __("Checking game file...") }}', 'info');
+                const response = await fetch(swfUrl, { method: 'HEAD', cache: 'no-store' });
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+                console.log('✅ SWF file is accessible');
+                updateStatus('{{ __("Game file found") }}', 'success');
+                return true;
+            } catch (error) {
+                console.error('❌ SWF file accessibility error:', error);
+                updateStatus('{{ __("Game file error") }}', 'error');
+                showError('Game File Error', 'The game file could not be loaded. It may not exist or the server is unreachable.');
+                return false;
+            }
+        }
+
+        // Initialize Ruffle player
+        async function initializeRuffle() {
+            try {
+                updateStatus('{{ __("Initializing player...") }}', 'info');
+                console.log('🔄 Waiting for Ruffle to load...');
+                
+                // Wait for Ruffle to load (max 10 seconds)
+                let attempts = 0;
+                while (typeof window.RufflePlayer === 'undefined' && attempts < 100) {
+                    await new Promise(resolve => setTimeout(resolve, 100));
+                    attempts++;
+                }
+
+                if (typeof window.RufflePlayer === 'undefined') {
+                    throw new Error('Ruffle player failed to load after 10 seconds');
+                }
+
+                console.log('✅ Ruffle loaded successfully');
+
+                // Set global Ruffle configuration
+                window.RufflePlayer.config = {
+                    "autoplay": "on",
+                    "unmuteOverlay": "visible", 
+                    "backgroundColor": "#B8B2B0",
+                    "wmode": "transparent",
+                    "logLevel": "warn",
+                    "letterbox": "on",
+                    "forceAlign": false,
+                    "scale": "showAll",
+                    "quality": "high",
+                    "allowScriptAccess": "sameDomain"
+                };
+
+                // Get Ruffle instance and create player
+                const ruffle = window.RufflePlayer.newest();
+                if (!ruffle) {
+                    throw new Error('Failed to get Ruffle instance');
+                }
+
+                const player = ruffle.createPlayer();
+                if (!player) {
+                    throw new Error('Failed to create Ruffle player instance');
+                }
+
+                console.log('✅ Ruffle player created');
+                updateStatus('{{ __("Player created") }}', 'success');
+
+                // Set player styles
+                player.style.width = "{{ $game->width }}px";
+                player.style.height = "{{ $game->height }}px";
+                player.style.maxWidth = "100%";
+                player.style.maxHeight = "100%";
+                player.style.display = "block";
+                player.style.margin = "0 auto";
+                player.style.backgroundColor = "#B8B2B0";
+
+                // Clear the loading content and add player to container
+                gameContainer.innerHTML = '';
+                gameContainer.appendChild(player);
+
+                console.log('✅ Player added to container');
+
+                // Add event listeners
+                player.addEventListener('loadeddata', () => {
+                    console.log('✅ Game loaded successfully!');
+                    updateStatus('{{ __("Game ready!") }}', 'success');
+                });
+
+                player.addEventListener('loadedmetadata', () => {
+                    console.log('✅ Game metadata loaded');
+                    updateStatus('{{ __("Loading game...") }}', 'info');
+                });
+
+                player.addEventListener('error', (e) => {
+                    console.error('❌ Ruffle player error:', e);
+                    updateStatus('{{ __("Game error") }}', 'error');
+                    showError('Game Loading Error', 'Failed to load the game. The file may be corrupted or incompatible.');
+                });
+
+                player.addEventListener('panic', (e) => {
+                    console.error('❌ Ruffle panic:', e);
+                    updateStatus('{{ __("Game crashed") }}', 'error');
+                    showError('Game Panic Error', 'The game encountered a critical error and cannot continue.');
+                });
+
+                // Load the SWF file
+                console.log('🔄 Loading SWF file:', swfUrl);
+                updateStatus('{{ __("Loading game...") }}', 'info');
+                
+                try {
+                    await player.load(swfUrl);
+                    console.log('✅ SWF load command sent');
+                    
+                    // Increment play count via API
+                    fetch(`{{ route('games.play', $game->slug) }}`, {
+                        method: 'POST',
+                        headers: {
+                            'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                            'Accept': 'application/json',
+                            'Content-Type': 'application/json'
+                        }
+                    }).catch(error => console.log('Play count update failed:', error));
+                    
+                } catch (loadError) {
+                    console.error('❌ SWF load error:', loadError);
+                    console.log('🔄 Trying alternative loading method...');
+                    player.src = swfUrl;
+                }
+
+            } catch (error) {
+                console.error('❌ Ruffle initialization error:', error);
+                updateStatus('{{ __("Initialization failed") }}', 'error');
+                showError('Initialization Error', 'Failed to initialize the game player: ' + error.message);
+            }
+        }
+
+        // Show error message to user
+        function showError(title, message) {
+            gameContainer.innerHTML = `
+                <div class="error-message">
+                    <i class="fas fa-exclamation-triangle fa-3x mb-3 text-warning"></i>
+                    <h5 class="text-dark">${title}</h5>
+                    <p class="text-muted">${message}</p>
+                    <div class="mt-3">
+                        <button onclick="location.reload()" class="btn btn-warning">
+                            <i class="fas fa-redo me-1"></i>{{ __('Retry') }}
+                        </button>
+                        <a href="{{ route('games.play', $game->slug) }}" class="btn btn-primary ms-2">
+                            <i class="fas fa-external-link-alt me-1"></i>{{ __('Full Page Mode') }}
+                        </a>
+                    </div>
+                </div>
+            `;
+        }
 
     // Debug information
     console.log('Game Debug Info:');
@@ -439,11 +655,35 @@ document.addEventListener('DOMContentLoaded', async function() {
         }
     });
 
-    // Auto-start the game loading process
-    updateStatus('{{ __("Starting...") }}', 'info');
-    if (await checkSwfFile()) {
-        await initializeRuffle();
-    }
+        // Auto-start the SWF game loading process
+        updateStatus('{{ __("Starting...") }}', 'info');
+        if (await checkSwfFile()) {
+            await initializeRuffle();
+        }
+    @endif
+
+    // Fullscreen functionality (works for both game types)
+    fullscreenBtn.addEventListener('click', async function() {
+        try {
+            if (!document.fullscreenElement) {
+                await gameContainer.requestFullscreen();
+                fullscreenBtn.innerHTML = '<i class="fas fa-compress me-1"></i>{{ __("Exit Fullscreen") }}';
+            } else {
+                await document.exitFullscreen();
+                fullscreenBtn.innerHTML = '<i class="fas fa-expand me-1"></i>{{ __("Fullscreen") }}';
+            }
+        } catch (err) {
+            console.error('Fullscreen error:', err);
+            alert('{{ __("Unable to toggle fullscreen mode. Please try pressing F11.") }}');
+        }
+    });
+
+    // Handle fullscreen change
+    document.addEventListener('fullscreenchange', () => {
+        if (!document.fullscreenElement) {
+            fullscreenBtn.innerHTML = '<i class="fas fa-expand me-1"></i>{{ __("Fullscreen") }}';
+        }
+    });
 });
 </script>
 @endpush

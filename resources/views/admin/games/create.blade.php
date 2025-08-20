@@ -45,20 +45,39 @@
                                 </div>
                             </div>
                             
-                            <div class="mb-3">
-                                <label for="category_id" class="form-label">{{ __('Category') }} *</label>
-                                <select class="form-select @error('category_id') is-invalid @enderror" 
-                                        id="category_id" name="category_id" required>
-                                    <option value="">{{ __('Select Category') }}</option>
-                                    @foreach($categories as $category)
-                                        <option value="{{ $category->id }}" {{ old('category_id') == $category->id ? 'selected' : '' }}>
-                                            {{ $category->name }} ({{ $category->class_level }})
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label for="category_id" class="form-label">{{ __('Category') }} *</label>
+                                    <select class="form-select @error('category_id') is-invalid @enderror" 
+                                            id="category_id" name="category_id" required>
+                                        <option value="">{{ __('Select Category') }}</option>
+                                        @foreach($categories as $category)
+                                            <option value="{{ $category->id }}" {{ old('category_id') == $category->id ? 'selected' : '' }}>
+                                                {{ $category->name }} ({{ $category->class_level }})
+                                            </option>
+                                        @endforeach
+                                    </select>
+                                    @error('category_id')
+                                        <div class="invalid-feedback">{{ $message }}</div>
+                                    @enderror
+                                </div>
+                                
+                                <div class="col-md-6 mb-3">
+                                    <label for="game_type" class="form-label">{{ __('Game Type') }} *</label>
+                                    <select class="form-select @error('game_type') is-invalid @enderror" 
+                                            id="game_type" name="game_type" required onchange="toggleGameTypeFields()">
+                                        <option value="">{{ __('Select Game Type') }}</option>
+                                        <option value="swf" {{ old('game_type') == 'swf' ? 'selected' : '' }}>
+                                            {{ __('SWF Game (Upload File)') }}
                                         </option>
-                                    @endforeach
-                                </select>
-                                @error('category_id')
-                                    <div class="invalid-feedback">{{ $message }}</div>
-                                @enderror
+                                        <option value="iframe" {{ old('game_type') == 'iframe' ? 'selected' : '' }}>
+                                            {{ __('Iframe Game (External Link)') }}
+                                        </option>
+                                    </select>
+                                    @error('game_type')
+                                        <div class="invalid-feedback">{{ $message }}</div>
+                                    @enderror
+                                </div>
                             </div>
                             
                             <div class="row">
@@ -81,26 +100,56 @@
                                 </div>
                             </div>
                             
-                            <div class="row">
-                                <div class="col-md-6 mb-3">
+                            <!-- SWF Game Fields -->
+                            <div id="swf-fields" style="display: none;">
+                                <div class="mb-3">
                                     <label for="swf_file" class="form-label">{{ __('SWF Game File') }} *</label>
                                     <input type="file" class="form-control @error('swf_file') is-invalid @enderror" 
-                                           id="swf_file" name="swf_file" accept=".swf" required>
+                                           id="swf_file" name="swf_file" accept=".swf">
                                     <div class="form-text">{{ __('Upload .swf file (max 50MB)') }}</div>
                                     @error('swf_file')
                                         <div class="invalid-feedback">{{ $message }}</div>
                                     @enderror
                                 </div>
-                                
-                                <div class="col-md-6 mb-3">
-                                    <label for="thumbnail" class="form-label">{{ __('Thumbnail Image') }}</label>
-                                    <input type="file" class="form-control @error('thumbnail') is-invalid @enderror" 
-                                           id="thumbnail" name="thumbnail" accept="image/*">
-                                    <div class="form-text">{{ __('Upload image (max 5MB)') }}</div>
-                                    @error('thumbnail')
+                            </div>
+                            
+                            <!-- Iframe Game Fields -->
+                            <div id="iframe-fields" style="display: none;">
+                                <div class="mb-3">
+                                    <label for="iframe_url" class="form-label">{{ __('Iframe URL') }}</label>
+                                    <input type="url" class="form-control @error('iframe_url') is-invalid @enderror" 
+                                           id="iframe_url" name="iframe_url" value="{{ old('iframe_url') }}"
+                                           placeholder="https://example.com/game.html">
+                                    <div class="form-text">{{ __('Enter the URL of the game to embed') }}</div>
+                                    @error('iframe_url')
                                         <div class="invalid-feedback">{{ $message }}</div>
                                     @enderror
                                 </div>
+                                
+                                <div class="mb-3">
+                                    <label for="iframe_code" class="form-label">{{ __('Custom Iframe Code') }}</label>
+                                    <textarea class="form-control @error('iframe_code') is-invalid @enderror" 
+                                              id="iframe_code" name="iframe_code" rows="4" 
+                                              placeholder="<iframe src='https://example.com/game.html' width='800' height='600'></iframe>">{{ old('iframe_code') }}</textarea>
+                                    <div class="form-text">{{ __('Or paste complete iframe code (optional - will override URL if provided)') }}</div>
+                                    @error('iframe_code')
+                                        <div class="invalid-feedback">{{ $message }}</div>
+                                    @enderror
+                                </div>
+                                
+                                @error('iframe_content')
+                                    <div class="alert alert-danger">{{ $message }}</div>
+                                @enderror
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label for="thumbnail" class="form-label">{{ __('Thumbnail Image') }}</label>
+                                <input type="file" class="form-control @error('thumbnail') is-invalid @enderror" 
+                                       id="thumbnail" name="thumbnail" accept="image/*">
+                                <div class="form-text">{{ __('Upload image (max 5MB)') }}</div>
+                                @error('thumbnail')
+                                    <div class="invalid-feedback">{{ $message }}</div>
+                                @enderror
                             </div>
                             
                             <div class="row">
@@ -183,5 +232,35 @@
         box-shadow: 0 5px 15px rgba(0,0,0,0.1);
     }
 </style>
+@endpush
+
+@push('scripts')
+<script>
+function toggleGameTypeFields() {
+    const gameType = document.getElementById('game_type').value;
+    const swfFields = document.getElementById('swf-fields');
+    const iframeFields = document.getElementById('iframe-fields');
+    const swfFileInput = document.getElementById('swf_file');
+    
+    if (gameType === 'swf') {
+        swfFields.style.display = 'block';
+        iframeFields.style.display = 'none';
+        swfFileInput.required = true;
+    } else if (gameType === 'iframe') {
+        swfFields.style.display = 'none';
+        iframeFields.style.display = 'block';
+        swfFileInput.required = false;
+    } else {
+        swfFields.style.display = 'none';
+        iframeFields.style.display = 'none';
+        swfFileInput.required = false;
+    }
+}
+
+// Initialize on page load
+document.addEventListener('DOMContentLoaded', function() {
+    toggleGameTypeFields();
+});
+</script>
 @endpush
 @endsection

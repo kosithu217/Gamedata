@@ -130,4 +130,22 @@ Route::get('/test-language', function() {
     ]);
 })->name('test-language');
 
+// Debug route for game testing
+Route::get('/debug-game/{slug}', function($slug) {
+    $game = \App\Models\Game::where('slug', $slug)->first();
+    if (!$game) {
+        return response()->json(['error' => 'Game not found']);
+    }
+    
+    return response()->json([
+        'game_type' => $game->game_type,
+        'is_iframe_game' => $game->isIframeGame(),
+        'is_swf_game' => $game->isSwfGame(),
+        'iframe_code' => $game->iframe_code,
+        'iframe_url' => $game->iframe_url,
+        'swf_file_path' => $game->swf_file_path,
+        'game_content' => $game->getGameContent()
+    ]);
+});
+
 

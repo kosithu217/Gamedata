@@ -78,18 +78,33 @@ class GameController extends Controller
 
     public function store(Request $request)
     {
-        $request->validate([
+        $rules = [
             'title' => 'required|string|max:255',
             'title_mm' => 'nullable|string|max:255',
             'description' => 'nullable|string',
             'description_mm' => 'nullable|string',
             'category_id' => 'required|exists:categories,id',
-            'swf_file' => 'required|file|mimes:swf|max:50000',
+            'game_type' => 'required|in:swf,iframe',
             'thumbnail' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:5000',
             'width' => 'nullable|integer|min:100|max:2000',
             'height' => 'nullable|integer|min:100|max:2000',
             'sort_order' => 'nullable|integer',
-        ]);
+        ];
+        
+        // Add conditional validation based on game type
+        if ($request->game_type === 'swf') {
+            $rules['swf_file'] = 'required|file|mimes:swf|max:50000';
+        } else {
+            $rules['iframe_url'] = 'nullable|url';
+            $rules['iframe_code'] = 'nullable|string';
+        }
+        
+        // Ensure at least one iframe option is provided for iframe games
+        $request->validate($rules);
+        
+        if ($request->game_type === 'iframe' && !$request->iframe_url && !$request->iframe_code) {
+            return back()->withErrors(['iframe_content' => 'Please provide either an iframe URL or iframe code.'])->withInput();
+        }
 
         $data = $request->all();
         $data['slug'] = Str::slug($request->title);
@@ -99,8 +114,8 @@ class GameController extends Controller
         $data['height'] = $request->height ?? 600;
         $data['sort_order'] = $request->sort_order ?? 0;
 
-        // Handle SWF file upload
-        if ($request->hasFile('swf_file')) {
+        // Handle file upload for SWF games
+        if ($request->game_type === 'swf' && $request->hasFile('swf_file')) {
             $swfFile = $request->file('swf_file');
             $swfFileName = time() . '_' . Str::slug($request->title) . '.swf';
             $swfPath = $swfFile->storeAs('games', $swfFileName, 'public');
@@ -135,18 +150,32 @@ class GameController extends Controller
 
     public function update(Request $request, Game $game)
     {
-        $request->validate([
+        $rules = [
             'title' => 'required|string|max:255',
             'title_mm' => 'nullable|string|max:255',
             'description' => 'nullable|string',
             'description_mm' => 'nullable|string',
             'category_id' => 'required|exists:categories,id',
-            'swf_file' => 'nullable|file|mimes:swf|max:50000',
+            'game_type' => 'required|in:swf,iframe',
             'thumbnail' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:5000',
             'width' => 'nullable|integer|min:100|max:2000',
             'height' => 'nullable|integer|min:100|max:2000',
             'sort_order' => 'nullable|integer',
-        ]);
+        ];
+        
+        // Add conditional validation based on game type
+        if ($request->game_type === 'swf') {
+            $rules['swf_file'] = 'nullable|file|mimes:swf|max:50000';
+        } else {
+            $rules['iframe_url'] = 'nullable|url';
+            $rules['iframe_code'] = 'nullable|string';
+        }
+        
+        $request->validate($rules);
+        
+        if ($request->game_type === 'iframe' && !$request->iframe_url && !$request->iframe_code) {
+            return back()->withErrors(['iframe_content' => 'Please provide either an iframe URL or iframe code.'])->withInput();
+        }
 
         $data = $request->all();
         $data['slug'] = Str::slug($request->title);
@@ -156,8 +185,23 @@ class GameController extends Controller
         $data['height'] = $request->height ?? 600;
         $data['sort_order'] = $request->sort_order ?? 0;
 
-        // Handle SWF file upload
-        if ($request->hasFile('swf_file')) {
+        // Handle game type change
+        if ($request->game_type !== $game->game_type) {
+            if ($request->game_type === 'iframe') {
+                // Switching to iframe, clear SWF data
+                if ($game->swf_file_path) {
+                    Storage::disk('public')->delete($game->swf_file_path);
+                }
+                $data['swf_file_path'] = null;
+            } else {
+                // Switching to SWF, clear iframe data
+                $data['iframe_url'] = null;
+                $data['iframe_code'] = null;
+            }
+        }
+
+        // Handle SWF file upload for SWF games
+        if ($request->game_type === 'swf' && $request->hasFile('swf_file')) {
             // Delete old file
             if ($game->swf_file_path) {
                 Storage::disk('public')->delete($game->swf_file_path);

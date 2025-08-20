@@ -198,6 +198,9 @@
                                                     @if($game->title_mm)
                                                         <br><small class="text-muted">{{ $game->title_mm }}</small>
                                                     @endif
+                                                    <br><small class="badge badge-sm {{ $game->isIframeGame() ? 'bg-info' : 'bg-secondary' }}">
+                                                        {{ $game->isIframeGame() ? 'Iframe' : 'SWF' }}
+                                                    </small>
                                                 </div>
                                             </div>
                                         </td>
