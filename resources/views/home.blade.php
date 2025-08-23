@@ -788,15 +788,20 @@
             <p class="text-white-50">{{ __('Choose games by your class level') }}</p>
         </div>
         
+        <!-- First row: First 4 categories -->
         <div class="row">
-            @foreach($categories as $category)
-            <div class="col-lg-3 col-md-4 col-sm-6 mb-4">
+            @foreach($categories->take(4) as $index => $category)
+            <div class="col-lg-3 col-md-6 col-sm-6 mb-4">
                 <div class="card card-game text-center">
                     <div class="card-body">
                         <div class="mb-3">
                             <div class="rounded-circle mx-auto d-flex align-items-center justify-content-center" 
                                  style="width: 80px; height: 80px; background-color: {{ $category->color }};">
-                                <i class="fas fa-graduation-cap fa-2x text-white"></i>
+                                @php
+                                    $icons = ['fas fa-gamepad', 'fas fa-puzzle-piece', 'fas fa-brain', 'fas fa-rocket', 'fas fa-star', 'fas fa-trophy', 'fas fa-heart', 'fas fa-magic'];
+                                    $iconClass = $icons[$index % count($icons)];
+                                @endphp
+                                <i class="{{ $iconClass }} fa-2x text-white"></i>
                             </div>
                         </div>
                         <h5 class="card-title">{{ $category->name }}</h5>
@@ -814,6 +819,40 @@
             </div>
             @endforeach
         </div>
+
+        <!-- Second row: 5th category centered -->
+        @if($categories->count() > 4)
+        <div class="row justify-content-center">
+            @foreach($categories->skip(4) as $index => $category)
+            <div class="col-lg-3 col-md-4 col-sm-6 mb-4">
+                <div class="card card-game text-center">
+                    <div class="card-body">
+                        <div class="mb-3">
+                            <div class="rounded-circle mx-auto d-flex align-items-center justify-content-center" 
+                                 style="width: 80px; height: 80px; background-color: {{ $category->color }};">
+                                @php
+                                    $icons = ['fas fa-gamepad', 'fas fa-puzzle-piece', 'fas fa-brain', 'fas fa-rocket', 'fas fa-star', 'fas fa-trophy', 'fas fa-heart', 'fas fa-magic'];
+                                    $iconClass = $icons[($index + 4) % count($icons)];
+                                @endphp
+                                <i class="{{ $iconClass }} fa-2x text-white"></i>
+                            </div>
+                        </div>
+                        <h5 class="card-title">{{ $category->name }}</h5>
+                        <p class="card-text text-muted">{{ $category->class_level }}</p>
+                        <p class="text-muted">
+                            <i class="fas fa-gamepad me-1"></i>{{ $category->games_count }} {{ __('games') }}
+                        </p>
+                        @auth
+                            <a href="{{ route('games.index', ['category' => $category->slug]) }}" class="btn btn-outline-primary">
+                                {{ __('Explore') }}
+                            </a>
+                        @endauth
+                    </div>
+                </div>
+            </div>
+            @endforeach
+        </div>
+        @endif
     </div>
 </section>
 @endif
