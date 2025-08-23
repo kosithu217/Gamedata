@@ -5,12 +5,12 @@
 @push('styles')
 <style>
     .game-player-container {
-        background: #B8B2B0;
+        /* background: #6c6dd2;
         border-radius: 10px;
         overflow: hidden;
         box-shadow: 0 10px 30px rgba(184,178,176,0.3);
         margin-bottom: 2rem;
-        border: 1px solid #A8A2A0;
+        border: 1px solid #A8A2A0; */
     }
 
     .game-player-header {
@@ -28,7 +28,7 @@
         display: flex;
         justify-content: center;
         align-items: center;
-        background: #B8B2B0;
+        background: #6c6dd2;
         min-height: {{ $game->height + 100 }}px;
         padding: 20px;
     }
@@ -70,32 +70,32 @@
 
     /* Override any black backgrounds from Ruffle player */
     #gameContainer ruffle-player {
-        background: #B8B2B0 !important;
+        background: #6c6dd2 !important;
     }
 
     #gameContainer canvas {
-        background: #B8B2B0 !important;
+        background: #6c6dd2 !important;
     }
 
     /* Ensure the game area has proper styling */
     #gameContainer ruffle-embed {
-        background: #B8B2B0 !important;
+        background: #6c6dd2 !important;
     }
 
     /* Additional override for any nested elements */
     #gameContainer * {
-        background-color: #B8B2B0 !important;
+        background-color: #6c6dd2 !important;
     }
 
     /* But allow the actual game content to have its own background */
     #gameContainer ruffle-player canvas {
-        background: #B8B2B0 !important;
+        background: #6c6dd2 !important;
     }
 
     /* Additional styling for better appearance */
-    .game-player-container {
+    /* .game-player-container {
         box-shadow: 0 10px 30px rgba(184,178,176,0.4);
-    }
+    } */
 
     /* Ensure loading text is visible on light gray background */
     .loading-spinner {
@@ -110,17 +110,17 @@
     .iframe-game-container iframe {
         border: none;
         border-radius: 8px;
-        box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+        /* box-shadow: 0 4px 15px rgba(0,0,0,0.2); */
         background: white;
     }
 </style>
 @endpush
 
 @section('content')
-<div class="container py-4">
-    <div class="row">
-        <!-- Game Player Section -->
-        <div class="col-lg-8">
+<div class="container-fluid py-4">
+    <div class="row justify-content-center">
+        <!-- Full Width Game Player Section -->
+        <div class="col-12 col-xl-10">
             <!-- Game Header -->
             <div class="d-flex justify-content-between align-items-start mb-3">
                 <div>
@@ -146,6 +146,9 @@
                     <a href="{{ route('games.play', $game->slug) }}" class="btn btn-outline-primary btn-sm">
                         <i class="fas fa-external-link-alt me-1"></i>{{ __('Full Page') }}
                     </a>
+                    <a href="/" class="btn btn-outline-secondary btn-sm">
+                        <i class="fas fa-arrow-left me-1"></i>{{ __('Back to Games') }}
+                    </a>
                 </div>
             </div>
 
@@ -168,80 +171,19 @@
                         </div>
                     @endif
                 </div>
-                
-                <!-- <div class="game-controls">
-                    <small class="text-white-50">
-                        {{ __('Use your mouse and keyboard to play. Click fullscreen for better experience.') }}
-                    </small>
-                </div> -->
             </div>
 
-            <!-- Game Info Section -->
+            <!-- Game Description (if exists) -->
+            @if($game->description)
             <div class="game-info-section">
                 <div class="card card-game">
                     <div class="card-body">
-                        @if($game->description)
-                        <div class="mb-4">
-                            <h5>{{ __('About This Game') }}</h5>
-                            <p class="text-muted">{{ $game->description }}</p>
-                        </div>
-                        @endif
-                        
-                        <!-- <div class="row">
-                            <div class="col-md-6">
-                                <h6>{{ __('Game Details') }}</h6>
-                                <ul class="list-unstyled">
-                                    <li><strong>{{ __('Category') }}:</strong> {{ $game->category->name }}</li>
-                                    <li><strong>{{ __('Class Level') }}:</strong> {{ $game->category->class_level }}</li>
-                                    <li><strong>{{ __('Dimensions') }}:</strong> {{ $game->width }}x{{ $game->height }}</li>
-                                    <li><strong>{{ __('Total Plays') }}:</strong> {{ $game->plays_count }}</li>
-                                </ul>
-                            </div>
-                        </div> -->
+                        <h5>{{ __('About This Game') }}</h5>
+                        <p class="text-muted">{{ $game->description }}</p>
                     </div>
-                </div>
-            </div>
-        </div>
-        
-        <!-- Sidebar -->
-        <div class="col-lg-4">
-            <!-- Game Status -->
-            <div class="card card-game mb-4">
-                <div class="card-body text-center">
-                    <h5 class="card-title">{{ __('Game Status') }}</h5>
-                    <div id="gameStatus" class="mb-3">
-                        <span class="badge bg-info">{{ __('Loading...') }}</span>
-                    </div>
-                    <p class="card-text text-muted small">{{ __('The game is loading automatically. No need to click any buttons!') }}</p>
-                </div>
-            </div>
-
-            @if($game->thumbnail)
-            <!-- Game Thumbnail -->
-            <div class="card card-game mb-4">
-                <div class="card-body">
-                    <h6 class="card-title">{{ __('Game Preview') }}</h6>
-                    <img src="{{ asset('storage/' . $game->thumbnail) }}" 
-                         class="img-fluid rounded" alt="{{ $game->title }}"
-                         style="width: 100%; height: 200px; object-fit: cover;">
                 </div>
             </div>
             @endif
-            
-            <!-- Navigation -->
-            <div class="card card-game">
-                <div class="card-body">
-                    <h6 class="card-title">{{ __('Navigation') }}</h6>
-                    <div class="d-grid gap-2">
-                        <a href="/" class="btn btn-outline-primary">
-                            <i class="fas fa-arrow-left me-2"></i>{{ __('Back to Games') }}
-                        </a>
-                        <a href="{{ route('games.index', ['category' => $game->category->slug]) }}" class="btn btn-outline-secondary">
-                            <i class="fas fa-list me-2"></i>{{ __('More from') }} {{ $game->category->name }}
-                        </a>
-                    </div>
-                </div>
-            </div>
         </div>
     </div>
 </div>
@@ -259,18 +201,11 @@
 document.addEventListener('DOMContentLoaded', async function() {
     const gameContainer = document.getElementById('gameContainer');
     const fullscreenBtn = document.getElementById('fullscreenBtn');
-    const gameStatus = document.getElementById('gameStatus');
     const isIframeGame = {{ (!$game->swf_file_path && ($game->iframe_code || $game->iframe_url)) ? 'true' : 'false' }};
 
-    // Update game status
+    // Update game status (console only since we removed the status display)
     function updateStatus(status, type = 'info') {
-        const statusClasses = {
-            'info': 'bg-info',
-            'success': 'bg-success', 
-            'warning': 'bg-warning text-dark',
-            'error': 'bg-danger'
-        };
-        gameStatus.innerHTML = `<span class="badge ${statusClasses[type]}">${status}</span>`;
+        console.log(`Game Status: ${status} (${type})`);
     }
 
     @if(!$game->swf_file_path && ($game->iframe_code || $game->iframe_url))
@@ -359,7 +294,7 @@ document.addEventListener('DOMContentLoaded', async function() {
                 window.RufflePlayer.config = {
                     "autoplay": "on",
                     "unmuteOverlay": "visible", 
-                    "backgroundColor": "#B8B2B0",
+                    "backgroundColor": "#6c6dd2",
                     "wmode": "transparent",
                     "logLevel": "warn",
                     "letterbox": "on",
@@ -390,7 +325,7 @@ document.addEventListener('DOMContentLoaded', async function() {
                 player.style.maxHeight = "100%";
                 player.style.display = "block";
                 player.style.margin = "0 auto";
-                player.style.backgroundColor = "#B8B2B0";
+                player.style.backgroundColor = "#6c6dd2";
 
                 // Clear the loading content and add player to container
                 gameContainer.innerHTML = '';
@@ -520,7 +455,7 @@ document.addEventListener('DOMContentLoaded', async function() {
             window.RufflePlayer.config = {
                 "autoplay": "on",
                 "unmuteOverlay": "visible", 
-                "backgroundColor": "#B8B2B0",
+                "backgroundColor": "#6c6dd2",
                 "wmode": "transparent",
                 "logLevel": "warn",
                 "letterbox": "on",
@@ -551,7 +486,7 @@ document.addEventListener('DOMContentLoaded', async function() {
             player.style.maxHeight = "100%";
             player.style.display = "block";
             player.style.margin = "0 auto";
-            player.style.backgroundColor = "#B8B2B0";
+            player.style.backgroundColor = "#6c6dd2";
 
             // Clear the loading content and add player to container
             gameContainer.innerHTML = '';
