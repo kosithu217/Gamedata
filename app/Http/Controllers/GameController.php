@@ -35,7 +35,7 @@ class GameController extends Controller
         // For guests, limit to featured games only (demo mode)
         if (!auth()->check()) {
             $query->where('is_featured', true)->take(6);
-            $games = $query->orderBy('sort_order')->get();
+            $games = $query->orderBy('created_at', 'desc')->get();
             $isDemo = true;
         } else {
             // Filter games based on user's assigned categories (students only)
@@ -50,7 +50,7 @@ class GameController extends Controller
             }
             
             // For logged-in users, show filtered games with pagination
-            $games = $query->orderBy('sort_order')->paginate(12);
+            $games = $query->orderBy('created_at', 'desc')->paginate(12);
             $isDemo = false;
         }
 
